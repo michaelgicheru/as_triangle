@@ -1,0 +1,52 @@
+# Wrapper function for as.triangle()
+
+
+### Description
+
+This is a wrapper function for the `ChainLadder::as.triangle()`
+function. This is for those who have noticed column gaps when using
+`as.triangle()` to convert claims data to the triangle format.
+
+### Motivation
+
+For example, this can occur when there are no claims in certain
+development periods. This affects downstream functions such as
+`incr2cum()` which may not take into account claims for some books with
+long tails, say, claims don’t occur for a long time e.g. between 5 and 7
+development period and then claims come in in the 10th development
+period. This results in the cumulative triangle cutting off where you
+don’t expect.
+
+This function aims to make sure that the “Triangle” input for the
+`as.triangle()` function has all the unique origin periods and all
+development periods are taken into account resulting in a sort of
+perfect half square.
+
+This is done by creating a skeleton using the unique origin periods and
+sequencing the length of these origin periods from 1. The data is then
+merged with the skeleton then passed through the traditional skeleton
+function:
+
+    as_triangle <- function(data, origin, dev, value) {
+      # create skeleton
+      unique_origins <- unique(data[[origin]])
+      dev_period <- 1:(length(unique_origins))
+      triangle_skeleton <- expand.grid(unique_origins, dev_period, stringsAsFactors = FALSE)
+      colnames(triangle_skeleton) <- c(origin, dev)
+
+      complete_skeleton <- merge(triangle_skeleton, data[, c(origin, dev)], by = c(origin, dev), all.x = TRUE)
+      incremental_triangle <- ChainLadder::as.triangle(
+        Triangle = complete_skeleton, 
+        origin = origin,
+        dev = dev,
+        value = value
+      )
+
+      return(incremental_triangle)
+    }
+
+### Limitations
+
+Triangles can only have development periods starting with 1. Currently,
+no function can be used a “catch all” for all instances of triangles.
+You can adjust the skeleton generated based on your triangle.
