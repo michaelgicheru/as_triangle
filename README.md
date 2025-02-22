@@ -24,8 +24,7 @@ perfect half square.
 
 This is done by creating a skeleton using the unique origin periods and
 sequencing the length of these origin periods from 1. The data is then
-merged with the skeleton then passed through the traditional skeleton
-function:
+merged with the skeleton then passed through the traditional `as.triangle` function:
 
     as_triangle <- function(data, origin, dev, value, start = 1, delay = 1) {
       # create skeleton
