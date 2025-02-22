@@ -27,14 +27,14 @@ sequencing the length of these origin periods from 1. The data is then
 merged with the skeleton then passed through the traditional skeleton
 function:
 
-    as_triangle <- function(data, origin, dev, value) {
+    as_triangle <- function(data, origin, dev, value, start = 1, delay = 1) {
       # create skeleton
       unique_origins <- unique(data[[origin]])
-      dev_period <- 1:(length(unique_origins))
+      dev_period <- seq(from = start, to = length(unique_origins), by = delay)
       triangle_skeleton <- expand.grid(unique_origins, dev_period, stringsAsFactors = FALSE)
       colnames(triangle_skeleton) <- c(origin, dev)
 
-      complete_skeleton <- merge(triangle_skeleton, data[, c(origin, dev)], by = c(origin, dev), all.x = TRUE)
+      complete_skeleton <- merge(triangle_skeleton, data[, c(origin, dev, value)], by = c(origin, dev), all.x = TRUE)
       incremental_triangle <- ChainLadder::as.triangle(
         Triangle = complete_skeleton, 
         origin = origin,
@@ -47,6 +47,4 @@ function:
 
 ### Limitations
 
-Triangles can only have development periods starting with 1. Currently,
-no function can be used a “catch all” for all instances of triangles.
-You can adjust the skeleton generated based on your triangle.
+I foresee a problem when you have "empty" origin periods. For example, a specific origin period between origin periods is not present in your data. The labelling of the development periods would not be accurate.
